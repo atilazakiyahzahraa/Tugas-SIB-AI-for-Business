@@ -1,0 +1,159 @@
+{
+  "name": "Tugas 2 Pengembangan Agen AI tanpa Coding",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "Hi there! 👋\nMy name is Sabrina. How can I assist you today?",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0f46284a-cc13-4303-aa62-2c3344143fbd",
+      "name": "When chat message received",
+      "webhookId": "f5f9e113-8482-4e82-8646-0f81dab738f5"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=Anda adalah asisten toko merchandise K-Pop yang membantu pelanggan mencari informasi produk.\n\nTugas Anda adalah menjawab pertanyaan pengguna mengenai:\n- jenis merchandise K-Pop\n- nama produk\n- deskripsi produk\n- harga produk\n\nGunakan data yang tersedia pada Google Sheets melalui tool \"Get row(s) in sheet in Google Sheets\" untuk menjawab pertanyaan pengguna.\n\nJika pengguna menanyakan:\n- harga produk\n- daftar merchandise yang tersedia\n- informasi atau deskripsi produk\nmaka ambil jawabannya dari data Google Sheets.\n\nJawablah dengan bahasa Indonesia yang sopan, jelas, dan mudah dipahami.\n\nJika produk yang ditanyakan tidak tersedia di data Google Sheets, beri tahu pengguna bahwa produk tersebut tidak ditemukan dalam database toko merchandise K-Pop."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "67abdf37-905b-4032-8727-e2829efedf14",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        144,
+        192
+      ],
+      "id": "5c2e19f6-970d-4855-8cc5-1de6208f2d6d",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "4GDe64ChRdVPdBcX",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        192
+      ],
+      "id": "f81d53c4-50bc-41b4-9221-a78d09086ecb",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1-rlcn4kmFdZKJq2JGYuf_BNfBfWpjUIHgySD-997cVw",
+          "mode": "list",
+          "cachedResultName": "List Harga Merchendise Kpop",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-rlcn4kmFdZKJq2JGYuf_BNfBfWpjUIHgySD-997cVw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-rlcn4kmFdZKJq2JGYuf_BNfBfWpjUIHgySD-997cVw/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        464,
+        192
+      ],
+      "id": "3f2ea3c6-8a0d-42e7-9618-59d71ab42b23",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "SZ8WNIF9JahM2Bl1",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "fc39e7ad-2ce6-4816-bc26-3cd067dd4f22",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8fb14153e1dc2934a0b1529e5939be686618bd31a2af753146612779b1c72598"
+  },
+  "id": "7dIEx0SwjRnTejPc",
+  "tags": []
+}

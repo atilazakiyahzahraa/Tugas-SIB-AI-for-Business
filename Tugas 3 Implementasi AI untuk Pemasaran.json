@@ -1,0 +1,316 @@
+{
+  "name": "Tugas 3 Implementasi AI untuk Pemasaran",
+  "nodes": [
+    {
+      "parameters": {
+        "name": "video tugas 3",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1oav--kygzJWzsImMocvGfoPrb-zEtuc3",
+          "mode": "list",
+          "cachedResultName": "Hasil Tugas 3 dan 4",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1oav--kygzJWzsImMocvGfoPrb-zEtuc3"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        384,
+        0
+      ],
+      "id": "f3bf855e-dedf-4515-8d77-1695780c3b14",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "c4VkZKR6cx1VHf1j",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const result = JSON.parse($json.data.resultJson);\n\nreturn [{\n  videoUrl: result.resultUrls?.[0] || null\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "feb41a8c-c540-4792-abf7-49a667b48321",
+      "name": "parse video URL"
+    },
+    {
+      "parameters": {
+        "formTitle": "Generate video  konten otomatis",
+        "formDescription": "isi informasi dibawah ini untuk memulai proses generate gambar",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "prompt"
+            },
+            {
+              "fieldLabel": "api_key"
+            },
+            {
+              "fieldLabel": "img_url"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -1104,
+        48
+      ],
+      "id": "36d28fc2-d066-4138-9459-d3e2a02f7b0f",
+      "name": "On form submission1",
+      "webhookId": "615c7fba-ce76-436b-a2ed-e9b08056a468"
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -688,
+        48
+      ],
+      "id": "372290b3-52d8-4c37-87f8-37dd7f31d9cb",
+      "name": "Wait1",
+      "webhookId": "77c99197-c186-46b4-8ea8-2e2ffb68bb2a",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $node[\"mengirim image generation request ke KEI.AI API1\"].json.data.taskId }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "=application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$node[\"On form submission1\"].json[\"api_key\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -480,
+        48
+      ],
+      "id": "7a1468be-d009-4e97-9f8f-c5a9a48d71a5",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7567e89f-bacd-4e6a-949d-891798b37970",
+              "leftValue": "={{ $json.data.state }}",
+              "rightValue": "=success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -272,
+        48
+      ],
+      "id": "e486f0ad-0f97-449f-9436-c2de573ba9cd",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.videoUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "7de6dd2b-ee30-49ca-9fcf-66692df2d163",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.api_key }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"grok-imagine/image-to-video\",\n  \"input\": {\n    \"image_urls\": [\n      \"https://drive.google.com/uc?export=download&id={{ $json.img_url.split('/d/')[1].split('/')[0] }}\"\n    ],\n    \"prompt\": \"{{$json.prompt}}\",\n    \"mode\": \"normal\",\n    \"duration\": 6,\n    \"resolution\": \"480p\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -896,
+        48
+      ],
+      "id": "3dacb54b-acf6-449f-9ad9-876e8965fe2d",
+      "name": "mengirim image generation request ke KEI.AI API1",
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "parse video URL": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission1": {
+      "main": [
+        [
+          {
+            "node": "mengirim image generation request ke KEI.AI API1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "parse video URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "mengirim image generation request ke KEI.AI API1": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "24761ca6-4a94-41f9-821e-884e6e933963",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8fb14153e1dc2934a0b1529e5939be686618bd31a2af753146612779b1c72598"
+  },
+  "id": "IqTD8C8zQoPjekwP",
+  "tags": []
+}
